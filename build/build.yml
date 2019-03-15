@@ -41,7 +41,7 @@ objects:
         - name: IMPORT_URL
           value: github.com/boltonsolutions/secret-management-operator
         - name: BINARY_NAME
-          value: secret-operator
+          value: secret-management-operator
         from:
           kind: ImageStreamTag
           name: go-toolset-1.10-rhel7:latest
