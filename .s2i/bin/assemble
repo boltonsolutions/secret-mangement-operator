@@ -57,7 +57,7 @@ if [[ `go list -f {{.Incomplete}}` == "true" ]]; then
 
         mkdir -p /opt/app-root/src/bin
 
-        mv $GOPATH/bin/$BINARY_NAME /opt/app-root/secret-operator
+        mv $GOPATH/bin/$BINARY_NAME /opt/app-root/gobinary
 
         popd
 
@@ -69,7 +69,7 @@ if [[ `go list -f {{.Incomplete}}` == "true" ]]; then
 
 else
 
-    go build -o /opt/app-root/secret-operator
+    go build -o /opt/app-root/gobinary
 
     popd
 
