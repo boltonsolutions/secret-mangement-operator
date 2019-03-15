@@ -1,0 +1,1 @@
+cmd/secret-management-operator/main.go
