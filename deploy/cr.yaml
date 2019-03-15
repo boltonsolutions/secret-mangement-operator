@@ -1,0 +1,4 @@
+apiVersion: "secret.management.operator/v1alpha1"
+kind: "AppService"
+metadata:
+  name: "example"
