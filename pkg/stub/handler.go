@@ -3,66 +3,51 @@ package stub
 import (
 	"context"
 
-	"github.com/boltonsolutions/secret-management-operator/pkg/apis/secret/v1alpha1"
-
 	"github.com/operator-framework/operator-sdk/pkg/sdk"
 	"github.com/sirupsen/logrus"
+	"github.com/boltonsolutions/secret-management-operator/pkg/vaults"
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
-func NewHandler() sdk.Handler {
-	return &Handler{}
+func NewHandler(config Config) sdk.Handler {
+	var provider vault.Provider
+
+	switch config.Provider.Kind {
+		case "hashicorp":
+			logrus.Infof("Hashi Corp Provider.")
+			provider = new(vault.HashiCorpProvider)
+		default:
+			panic("Well that didn't work.")
+	}
+
+	return &Handler{
+		config:   config,
+		provider: provider,
+	}
 }
 
 type Handler struct {
-	// Fill me
+	config   Config
+	provider vaults.Provider
 }
 
 func (h *Handler) Handle(ctx context.Context, event sdk.Event) error {
 	switch o := event.Object.(type) {
-	case *v1alpha1.AppService:
-		err := sdk.Create(newbusyBoxPod(o))
-		if err != nil && !errors.IsAlreadyExists(err) {
-			logrus.Errorf("failed to create busybox pod : %v", err)
-			return err
-		}
+	case *corev1.Secret:
+		h.handleSecret(o)
 	}
 	return nil
 }
 
-// newbusyBoxPod demonstrates how to create a busybox pod
-func newbusyBoxPod(cr *v1alpha1.AppService) *corev1.Pod {
-	labels := map[string]string{
-		"app": "busy-box",
+func (h *Handler) handleSecret(secret *corev1.Secret) error {
+
+	if route.ObjectMeta.Annotations == nil || route.ObjectMeta.Annotations[h.config.General.Annotations.Status] == "" {
+		return nil
 	}
-	return &corev1.Pod{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "Pod",
-			APIVersion: "v1",
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "busy-box",
-			Namespace: cr.Namespace,
-			OwnerReferences: []metav1.OwnerReference{
-				*metav1.NewControllerRef(cr, schema.GroupVersionKind{
-					Group:   v1alpha1.SchemeGroupVersion.Group,
-					Version: v1alpha1.SchemeGroupVersion.Version,
-					Kind:    "AppService",
-				}),
-			},
-			Labels: labels,
-		},
-		Spec: corev1.PodSpec{
-			Containers: []corev1.Container{
-				{
-					Name:    "busybox",
-					Image:   "busybox",
-					Command: []string{"sleep", "3600"},
-				},
-			},
-		},
+
+	if route.ObjectMeta.Annotations[h.config.General.Annotations.Status] == "need" {
+		logrus.Infof("We need a secret from the vault.")
 	}
 }
+
+
