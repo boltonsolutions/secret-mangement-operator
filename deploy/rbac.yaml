@@ -3,48 +3,38 @@ apiVersion: v1
 kind: Template
 objects:
   - apiVersion: v1
-    kind: Role
-    apiVersion: rbac.authorization.k8s.io/v1beta1
+    kind: ClusterRole
     metadata:
-      name: secret-management-operator
+      name: secret-operator-role
     rules:
-    - apiGroups:
-      - secret.management.operator
-      resources:
-      - "*"
-      verbs:
-      - "*"
-    - apiGroups:
-      - ""
-      resources:
-      - pods
-      - services
-      - endpoints
-      - persistentvolumeclaims
-      - events
-      - configmaps
-      - secrets
-      verbs:
-      - "*"
-    - apiGroups:
-      - apps
-      resources:
-      - deployments
-      - daemonsets
-      - replicasets
-      - statefulsets
-      verbs:
-      - "*"
+      - apiGroups:
+        - ""
+        attributeRestrictions: null
+        resources:
+        - secrets
+        verbs:
+        - create
   - apiVersion: v1
     kind: RoleBinding
-    apiVersion: rbac.authorization.k8s.io/v1beta1
     metadata:
-      name: default-account-secret-management-operator
+      name: secret-operator
+      namespace: ${NAMESPACE}
+    roleRef:
+      name: secret-operator-role
     subjects:
     - kind: ServiceAccount
       name: default
-      namespace: secret-operator
+      namespace: ${NAMESPACE}
+  - apiVersion: v1
+    kind: ClusterRoleBinding
+    metadata:
+      name: secret-operator-cluster-admin
     roleRef:
-      kind: Role
-      name: secret-management-operator
-      apiGroup: rbac.authorization.k8s.io
+      name: cluster-admin
+    subjects:
+    - kind: ServiceAccount
+      name: default
+      namespace: ${NAMESPACE}
+parameters:
+  - name: NAMESPACE
+    value: secret-operator

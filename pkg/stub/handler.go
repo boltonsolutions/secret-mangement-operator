@@ -10,12 +10,12 @@ import (
 )
 
 func NewHandler(config Config) sdk.Handler {
-	var provider vault.Provider
-
+	var provider vaults.Provider
+	
 	switch config.Provider.Kind {
 		case "hashicorp":
 			logrus.Infof("Hashi Corp Provider.")
-			provider = new(vault.HashiCorpProvider)
+			provider = new(vaults.HashiCorpProvider)
 		default:
 			panic("Well that didn't work.")
 	}
@@ -41,13 +41,14 @@ func (h *Handler) Handle(ctx context.Context, event sdk.Event) error {
 
 func (h *Handler) handleSecret(secret *corev1.Secret) error {
 
-	if route.ObjectMeta.Annotations == nil || route.ObjectMeta.Annotations[h.config.General.Annotations.Status] == "" {
+	if secret.ObjectMeta.Annotations == nil || secret.ObjectMeta.Annotations[h.config.General.Annotations.Status] == "" {
 		return nil
 	}
 
-	if route.ObjectMeta.Annotations[h.config.General.Annotations.Status] == "need" {
+	if secret.ObjectMeta.Annotations[h.config.General.Annotations.Status] == "need" {
 		logrus.Infof("We need a secret from the vault.")
 	}
+	return nil
 }
 
 

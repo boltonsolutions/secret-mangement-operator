@@ -3,11 +3,9 @@ package main
 import (
 	"context"
 	"runtime"
-	"time"
 
 	stub "github.com/boltonsolutions/secret-management-operator/pkg/stub"
 	sdk "github.com/operator-framework/operator-sdk/pkg/sdk"
-	k8sutil "github.com/operator-framework/operator-sdk/pkg/util/k8sutil"
 	sdkVersion "github.com/operator-framework/operator-sdk/version"
 
 	"github.com/sirupsen/logrus"
@@ -23,17 +21,11 @@ func printVersion() {
 func main() {
 	printVersion()
 
+	conf := stub.NewConfig()
 	sdk.ExposeMetricsPort()
 
-	resource := "secret.management.operator/v1alpha1"
-	kind := "AppService"
-	namespace, err := k8sutil.GetWatchNamespace()
-	if err != nil {
-		logrus.Fatalf("failed to get watch namespace: %v", err)
-	}
-	resyncPeriod := time.Duration(5) * time.Second
-	logrus.Infof("Watching %s, %s, %s, %d", resource, kind, namespace, resyncPeriod)
-	sdk.Watch(resource, kind, namespace, resyncPeriod)
-	sdk.Handle(stub.NewHandler())
+	logrus.Infof("Watching Secrets on all Namespaces")
+	sdk.Watch("v1", "Secret", "", 1000000000)
+	sdk.Handle(stub.NewHandler(conf))
 	sdk.Run(context.TODO())
 }

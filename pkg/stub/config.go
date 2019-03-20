@@ -8,6 +8,8 @@ import (
 	"github.com/micro/go-config/source/flag"
 	"github.com/micro/go-config/source/memory"
 	"github.com/boltonsolutions/secret-management-operator/pkg/vaults"
+	"github.com/sirupsen/logrus"
+	"encoding/json"
 )
 
 type Config struct {
@@ -25,6 +27,7 @@ type AnnotationConfig struct {
 
 const (
 	defaultConfigFile = "/etc/secret-management-operator/config.yaml"
+	defaultProvider   = "hashicorp"
 	defaultConfig = `
   {
     "general": {
@@ -59,12 +62,21 @@ func NewConfig() Config {
 	var conf Config
 
 	tmpConfig.Scan(&conf)
-
+	logrus.Infof(conf.String())
 	return conf
 }
 
 func getConfigFile() (configFile string) {
+	logrus.Infof("Loading default config file from %v", defaultConfigFile)
 	return defaultConfigFile
+}
+
+func (c *Config) String() string {
+	out, err := json.Marshal(c)
+	if err != nil {
+		panic(err)
+	}
+	return string(out)
 }
 
 

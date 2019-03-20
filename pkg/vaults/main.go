@@ -17,5 +17,4 @@ type KeyPair struct {
 
 type ProviderConfig struct {
 	Kind string `json:"kind"`
-	Ssl string  `json:"ssl"`
 }
