@@ -2,14 +2,10 @@
 package stub
 
 import (
-	config "github.com/micro/go-config"
-	"github.com/micro/go-config/source/env"
-	"github.com/micro/go-config/source/file"
-	"github.com/micro/go-config/source/flag"
-	"github.com/micro/go-config/source/memory"
 	"github.com/boltonsolutions/secret-management-operator/pkg/vaults"
-	"github.com/sirupsen/logrus"
 	"encoding/json"
+	"os"
+	"fmt"
 )
 
 type Config struct {
@@ -26,8 +22,6 @@ type AnnotationConfig struct {
 }
 
 const (
-	defaultConfigFile = "/etc/secret-management-operator/config.yaml"
-	defaultProvider   = "hashicorp"
 	defaultConfig = `
   {
     "general": {
@@ -42,33 +36,15 @@ const (
 )
 
 func NewConfig() Config {
-
-	tmpConfig := config.NewConfig()
-
-	data := []byte(defaultConfig)
-
-	memorySource := memory.NewSource(
-		memory.WithData(data),
-	)
-	// Load json config file
-	tmpConfig.Load(
-		memorySource,
-		file.NewSource(
-			file.WithPath(getConfigFile()),
-		),
-		env.NewSource(),
-		flag.NewSource(),
-	)
-	var conf Config
-
-	tmpConfig.Scan(&conf)
-	logrus.Infof(conf.String())
-	return conf
-}
-
-func getConfigFile() (configFile string) {
-	logrus.Infof("Loading default config file from %v", defaultConfigFile)
-	return defaultConfigFile
+	var config Config
+    configFile, err := os.Open("/etc/secret-management-operator/config.yaml")
+    defer configFile.Close()
+    if err != nil {
+        fmt.Println(err.Error())
+    }
+    jsonParser := json.NewDecoder(configFile)
+    jsonParser.Decode(&config)
+    return config
 }
 
 func (c *Config) String() string {
