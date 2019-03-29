@@ -17,4 +17,7 @@ type KeyPair struct {
 
 type ProviderConfig struct {
 	Kind string `json:"kind"`
+	Token string `json:"token"`
+	Address string `json:"address"`
+	Engine string `json:"engine"`
 }

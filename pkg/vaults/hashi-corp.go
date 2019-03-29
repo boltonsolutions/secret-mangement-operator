@@ -4,12 +4,13 @@ import (
 	"time"
 	api "github.com/hashicorp/vault/api"
 	"fmt"
+	"github.com/boltonsolutions/secret-management-operator/pkg/stub/config"
 )
 
 type HashiCorpProvider struct {
 }
 
-func (p *HashiCorpProvider) Provision() (keypair KeyPair, certError error) {
+func (p *HashiCorpProvider) Provision(config Config) (keypair KeyPair, certError error) {
 
 	fmt.Printf("Hashi Corp Start")
 	client, err := api.NewClient(&api.Config{
