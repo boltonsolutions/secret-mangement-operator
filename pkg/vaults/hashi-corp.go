@@ -1,18 +1,16 @@
 package vaults
 
 import (
-	"time"
 	api "github.com/hashicorp/vault/api"
 	"fmt"
-	"github.com/boltonsolutions/secret-management-operator/pkg/stub/config"
 )
 
 type HashiCorpProvider struct {
 }
 
-func (p *HashiCorpProvider) Provision(config Config) (keypair KeyPair, certError error) {
+func (p *HashiCorpProvider) Provision() (usernamePassword UsernamePassword, certError error) {
 
-	fmt.Printf("Hashi Corp Start")
+	fmt.Printf("Hashi Corp Start\n")
 	client, err := api.NewClient(&api.Config{
 	    Address: "http://127.0.0.1:8200",
 	})
@@ -21,22 +19,35 @@ func (p *HashiCorpProvider) Provision(config Config) (keypair KeyPair, certError
 		fmt.Printf("error...")
 	}
 
-	client.SetToken("s.gZFIyinkDU8z3MB8vHwEjZoW")
+	client.SetToken("s.P7WHoiC2rYz4Hvu5WdXHRnhB")
 
 	secretValues, err := client.Logical().Read("secret/data/com/bolton")
 	if err != nil {
 		fmt.Printf("error...")
 	}
 
-	fmt.Printf("secret %s -> %v", "username", secretValues)
+	var username []byte
+	var password []byte
+
+	for _, record := range secretValues.Data {
+
+	    if rec, ok := record.(map[string]interface{}); ok {
+	        for key, value := range rec {
+	        	if key == "username" {
+	        		username = []byte(value.(string))
+	        	}
+	        	if key == "password" {
+	        		password = []byte(value.(string))
+	        	}
+	        }
+	    }
+	}
 	
-	return KeyPair{
-		Secret:   []byte{},
-		Key:    []byte{},
-		Expiry: time.Now(),
-	}, nil
+	return UsernamePassword{
+		username,
+		password }, nil
 }
 
-func (p *HashiCorpProvider) Deprovision(host string) error {
+func (p *HashiCorpProvider) Deprovision() error {
 	return nil
 }

@@ -1,18 +1,16 @@
 package vaults
 
 import (
-	"time"
 )
 
 type Provider interface {
-	Provision() (KeyPair, error)
-	Deprovision(host string) error
+	Provision() (UsernamePassword, error)
+	Deprovision() error
 }
 
-type KeyPair struct {
-	Secret   []byte
-	Key    []byte
-	Expiry time.Time
+type UsernamePassword struct {
+	Username []byte
+	Password []byte
 }
 
 type ProviderConfig struct {
