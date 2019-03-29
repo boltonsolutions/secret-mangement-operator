@@ -47,6 +47,7 @@ func (h *Handler) handleSecret(secret *corev1.Secret) error {
 
 	if secret.ObjectMeta.Annotations[h.config.General.Annotations.Status] == "need" {
 		logrus.Infof("We need a secret from the vault.")
+		h.provider.Provision()
 	}
 	return nil
 }
